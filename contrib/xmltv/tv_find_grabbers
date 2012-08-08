@@ -1,0 +1,45 @@
+#!/bin/sh
+declare String foundfiles
+declare -A grab
+
+get_grabbers()
+{
+IFS=:
+for p in $PATH; do
+  files=$(find $p -type f -name "tv_grab*")
+  if [ ! -z $files ]; then
+    foundfiles=$foundfiles$files
+  fi
+done
+}
+
+check_grabber()
+{
+IFS="
+"
+i=0
+for f in $foundfiles
+do
+  if [ -x "$f" ]; then
+    f_out=$($f --description 2>/dev/null)
+    if [ ! -z $f_out ]; then
+      tmp="$f|$f_out"
+      grab[$tmp]=1
+      i=$((i+1))
+    fi
+  fi
+done
+}
+
+print_grabbers()
+{
+for i in "${!grab[@]}"
+do
+  echo "$i"
+done
+}
+
+get_grabbers
+check_grabber
+print_grabbers
+
